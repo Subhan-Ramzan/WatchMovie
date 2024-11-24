@@ -7,6 +7,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
+import { FaBell, FaSearch } from "react-icons/fa";
 
 export default function Navbar() {
   const [scrolling, setScrolling] = useState(false);
@@ -46,7 +47,7 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 100);
+      setIsScrolled(window.scrollY > 10);
     };
     window.addEventListener("scroll", handleScroll);
     return () => {
@@ -54,87 +55,107 @@ export default function Navbar() {
     };
   }, []);
 
-  // Detect scroll position to make the navbar transparent
   useEffect(() => {
     const handleScroll = () => {
-      // Log scroll position for debugging
-      console.log(window.scrollY); // Check the scroll position in the console
+
+      console.log(window.scrollY);
       if (window.scrollY > 10) {
-        setScrolling(true); // Scroll down a little, set navbar to transparent
+        setScrolling(true);
       } else {
-        setScrolling(false); // At the top, make it fully opaque
+        setScrolling(false);
       }
     };
 
-    // Listen to scroll events
     window.addEventListener("scroll", handleScroll);
 
-    // Clean up the event listener on component unmount
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
   return (
-    <>
-      <header
-        className={`flex justify-between items-center w-full fixed top-0 left-0 z-50 px-8 py-3 shadow-lg transition-all duration-300 ${isScrolled ? "bg-gray-900/30 fixed shadow-lg" : "bg-gray-900"
-          } z-50`}
-      >
+    <header
+      className={`flex justify-between items-center w-full fixed top-0 left-0 z-50 px-6 sm:px-8 py-4 shadow-lg transition-all duration-300 ${isScrolled ? "bg-gray-900/80 shadow-lg" : "bg-gray-900"
+        }`}
+    >
+      {/* Logo */}
+      <div className="flex items-center gap-4">
+        <Link href="/">
+          <span className="relative group text-white text-xl md:text-2xl font-semibold transition-transform hover:scale-110">
+            <span className="text-blue-500">&lt;</span>
+            <span className="text-white group-hover:rotate-45 transition-transform duration-500">
+              Watch
+            </span>
+            <span className="text-blue-500 group-hover:text-blue-900 group-hover:rotate-45 transition-all duration-1000">
+              Movie/&gt;
+            </span>
+          </span>
+        </Link>
+        {/* Navbar Links */}
+        <nav className="hidden lg:flex items-center gap-6 text-white text-sm sm:text-base">
+          <Link href="/" className="hover:text-blue-500 transition-colors">
+            Home
+          </Link>
+          <Link href="/movies" className="hover:text-blue-500 transition-colors">
+            Movies
+          </Link>
+          <Link href="/movies" className="hover:text-blue-500 transition-colors">
+            TV Shows
+          </Link>
+          <Link href="/playlist" className="hover:text-blue-500 transition-colors">
+            PlayList
+          </Link>
+        </nav>
+      </div>
 
-        <div>
-          <div className="flex items-center">
-            <Link href="/">
-              <span className="relative group text-white text-xl md:text-2xl font-semibold hover:animate-spin transition-colors duration-300 transform hover:scale-110">
-                <span className="text-blue-500">&lt;</span>
-                <span className="text-white group-hover:rotate-45 transition-transform duration-500">
-                  Watch
-                </span>
-                <span className="text-blue-500 group-hover:text-blue-900 group-hover:rotate-45 transition-all duration-1000">
-                  Movie/&gt;
-                </span>
-              </span>
+      {/* Search, Notifications, and User Account */}
+      <div className="flex items-center gap-4">
+        {/* Search */}
+        <div className="relative hidden sm:flex">
+          <input
+            type="text"
+            placeholder="Search..."
+            className="px-4 py-2 rounded-full bg-gray-800 text-white text-sm outline-none placeholder-gray-400 focus:ring-2 focus:ring-blue-500"
+          />
+          <button className="absolute top-1/2 right-3 transform -translate-y-1/2 text-white hover:text-blue-500">
+            <FaSearch />
+          </button>
+        </div>
+
+        {/* Notifications */}
+        <button className="text-white hover:text-blue-500 transition-colors">
+          <FaBell className="text-lg" />
+        </button>
+
+        {/* User Profile */}
+        {status === "authenticated" || userData ? (
+          <div className="flex items-center justify-center gap-2">
+            <p className="text-white hidden md:block">
+              Hi, {session?.user?.name || userData.username || "User"}
+            </p>
+            <button
+              onClick={async () => {
+                await signOut();
+                await logoutCookies();
+              }}
+              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+        ) : (
+          <div className="flex gap-3 items-center justify-center">
+            <Link href="/login" className="text-white hover:text-blue-500">
+              Login
+            </Link>
+            <Link href="/signup">
+              <button className="bg-gradient-to-br from-purple-500 to-blue-500 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-2 px-4 rounded-full transition-all">
+                Sign Up
+              </button>
             </Link>
           </div>
-        </div>
-        <div className="md:flex items-center gap-4">
-          {status === "authenticated" || userData !== null ? (
-            <>
-              <p className="text-white">
-                Welcome,{" "}
-                {session?.user?.name ||
-                  userData.username ||
-                  session?.user?.email?.split(/(?=\d)/)[0]}
-              </p>
-              <button
-                onClick={async () => {
-                  await signOut();
-                  await logoutCookies();
-                }}
-                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300"
-
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <div className="gap-2 flex items-center justify-center">
-              <Link
-                href="/login"
-                className="text-white hover:text-blue-500 transition-colors duration-300"
-              >
-                Login
-              </Link>
-              <Link href="/signup">
-                <button className="bg-gradient-to-br from-purple-500 to-blue-500 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-2 md:px-4 px-3 rounded-lg transition-colors duration-300">
-                  Sign up
-                </button>
-              </Link>
-            </div>
-          )}
-        </div>
-      </header>
-      <ToastContainer />
-    </>
+        )}
+      </div>
+    </header>
   );
 }

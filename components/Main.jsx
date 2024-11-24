@@ -6,7 +6,8 @@ export default function Main() {
         <main className="pt-24 px-6 bg-slate-950 text-white min-h-screen">
             <div className="max-w-7xl mx-auto text-center py-16">
                 <h1 className="text-5xl font-bold mb-6 leading-tight">Unlimited Movies, TV Shows, and More</h1>
-                <p className="text-xl pb-8 text-gray-300">Starts at Rs 250. Cancel anytime.</p>
+                <p className="text-xl pb-8 text-gray-300">Some movies are available for free. If you want to watch in 4K, you can get a membership starting at Rs 250.</p>
+
                 <h3 className="text-2xl font-medium pb-6">
                     Ready to watch? Enter your email to create or restart your membership.
                 </h3>
@@ -68,7 +69,7 @@ export default function Main() {
                     ))}
                 </div>
             </section>
-            <hr />
+            <hr className='md:block hidden' />
         </main>
     );
 }

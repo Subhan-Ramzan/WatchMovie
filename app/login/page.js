@@ -135,7 +135,7 @@ const Login = () => {
           <meta property="og:url" content="https://subhanramzan.com/login" />
           <meta property="og:type" content="website" />
         </Head>
-        <div className="text-white min-h-screen flex flex-col justify-center items-center px-5 py-3 md:py-6 bg-gradient-radial from-black via-[#000] to-[#63e]">
+        <div className="text-white min-h-screen py-20 flex flex-col justify-center items-center px-5 bg-gradient-radial from-black via-[#000] to-[#63e]">
           <div className="flex justify-center items-center text-center py-1">
             <Link href="/">
               <span className="text-white text-3xl font-semibold hover:text-white transition duration-300">

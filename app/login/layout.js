@@ -1,6 +1,6 @@
 export const metadata = {
-    title: "Login - New Fashion",
-    description: "Log in to access your profile and cart.",
+    title: "Login - Watch Movie",
+    description: "Log in to access your profile and watch movies online.",
   };
   
   export default function LoginLayout({ children }) {

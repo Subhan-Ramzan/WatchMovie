@@ -130,7 +130,7 @@ const Signup = () => {
         <meta property="og:type" content="website" />
       </Head>
 
-      <div className="min-h-screen flex flex-col justify-center items-center bg-[radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)] px-4 py-8">
+      <div className="min-h-screen py-24 flex flex-col justify-center items-center bg-[radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)] px-4">
         <Link href="/">
           <span className="text-3xl md:text-4xl font-bold text-white hover:text-gray-300 transition duration-300 text-center">
             <span className="text-blue-400">&lt;</span>
