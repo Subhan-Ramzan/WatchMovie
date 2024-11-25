@@ -25,7 +25,7 @@ const Login = () => {
       try {
         // Check if session exists
         if (sessionStatus === "authenticated") {
-          router.push("/read");
+          router.push("/movies");
           return;
         }
 
@@ -35,7 +35,7 @@ const Login = () => {
         });
 
         if (response.status === 200 && response.data?.user) {
-          router.push("/profile");
+          router.push("/movies");
         }
       } catch (error) {
         // If no session or cookie, remain on the login page
@@ -49,7 +49,7 @@ const Login = () => {
 
   useEffect(() => {
     if (sessionStatus === "authenticated") {
-      router.push("/profile");
+      router.push("/movies");
     }
   }, [sessionStatus, router]);
 
@@ -65,7 +65,7 @@ const Login = () => {
       const response = await axios.post("/api/login", form);
       toast.success("Login successful!"); // Notify success
       setError(null);
-      window.location.href = "/";
+      window.location.href = "/movies";
     } catch (error) {
       if (error.response) {
         toast.error(error.response.data.message || "An error occurred"); // Notify specific error
@@ -80,7 +80,7 @@ const Login = () => {
   };
 
   const handleLogin = (provider) => {
-    signIn(provider, { callbackUrl: "/" });
+    signIn(provider, { callbackUrl: "/movies" });
   };
 
   if (sessionStatus === "loading") {
@@ -218,7 +218,7 @@ const Login = () => {
                             value={form.email}
                             onChange={handleChange}
                             required
-                            className="block w-full rounded-md border-0 py-1.5 text-white shadow-sm ring-1 ring-inset ring-gray-300 bg-white/10 placeholder:text-white/40 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            className="block w-full rounded-md border-0 px-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-gray-300 bg-white/10 placeholder:text-white/40 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                           />
                         </div>
                       </div>
@@ -249,7 +249,7 @@ const Login = () => {
                             value={form.password}
                             onChange={handleChange}
                             required
-                            className="block w-full rounded-md border-0 py-1.5 text-white shadow-sm ring-1 ring-inset ring-gray-300 bg-white/10 placeholder:text-white/40 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            className="block w-full rounded-md border-0 px-2 py-1.5 text-white shadow-sm ring-1 ring-inset ring-gray-300 bg-white/10 placeholder:text-white/40 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                           />
                         </div>
                       </div>

@@ -31,8 +31,8 @@ export default function VerifyPage() {
     }
 
     return (
-        <div className="p-6 max-w-sm mx-auto">
-            <label htmlFor="token" className="block mb-2 text-lg font-medium text-gray-700">
+        <div className="p-6 pt-24 max-w-sm mx-auto">
+            <label htmlFor="token" className="block mb-2 text-lg text-center font-bold text-gray-100">
                 Token
             </label>
             <input

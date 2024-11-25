@@ -7,40 +7,55 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import { FaBell, FaSearch } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
+import { CldImage } from "next-cloudinary";
+import { FaRegCircleUser } from "react-icons/fa6";
 
 export default function Navbar() {
   const [scrolling, setScrolling] = useState(false);
   const { data: session, status } = useSession();
   const [userData, setUserData] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [publicId, setPublicId] = useState(null);
   const router = useRouter();
 
   const logoutCookies = async () => {
     try {
       await axios.post("/api/logout");
       setUserData(null);
-      toast.success("Logout successful!"); // Notify successful logout
+      toast.success("Logout successful!");
     } catch (err) {
       console.error("Logout Error:", err);
-      toast.error("Logout failed. Please try again."); // Notify error on logout
+      toast.error("Logout failed. Please try again.");
     }
   };
   useEffect(() => {
+    console.log("status:", status); // Debugging line
+    console.log("userData:", userData); // Debugging line
+
     const fetchCookieData = async () => {
       try {
         const response = await axios.get("/api/protected", {
           withCredentials: true,
         });
         setUserData(response.data.user);
-        // toast.success("User data fetched successfully!"); // Notify successful fetch
+        const user = response.data.user;
+        const id = user.id;
+
+        if (id) {
+          const imageResponse = await axios.get(`/api/profileimage/${id}`);
+          setPublicId(imageResponse.data.public_id);
+        } else {
+          console.log("No user ID found; skipping profile image fetch");
+        }
       } catch (error) {
         console.log("Failed to fetch protected data:", error);
-        // toast.error("Failed to fetch user data. Please try again."); // Notify fetch error
+        setUserData(null);
+        console.log("User data set to null due to fetch error");
       }
     };
 
-    if (status === "unauthenticated" && !userData) {
+    if (status === "unauthenticated" && userData === null) {
       fetchCookieData();
     }
   }, [status, userData, router]);
@@ -76,12 +91,11 @@ export default function Navbar() {
   return (
     <header
       className={`flex justify-between items-center w-full fixed top-0 left-0 z-50 px-6 sm:px-8 py-4 shadow-lg transition-all duration-300 ${isScrolled ? "bg-gray-900/80 shadow-lg" : "bg-gray-900"
-        }`}
-    >
+        }`}>
       {/* Logo */}
       <div className="flex items-center gap-4">
         <Link href="/">
-          <span className="relative group text-white text-xl md:text-2xl font-semibold transition-transform hover:scale-110">
+          <span className="relative group text-white text-xl md:text-xl font-semibold transition-transform hover:scale-110">
             <span className="text-blue-500">&lt;</span>
             <span className="text-white group-hover:rotate-45 transition-transform duration-500">
               Watch
@@ -110,6 +124,7 @@ export default function Navbar() {
 
       {/* Search, Notifications, and User Account */}
       <div className="flex items-center gap-4">
+
         {/* Search */}
         <div className="relative hidden sm:flex">
           <input
@@ -122,10 +137,36 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Notifications */}
-        <button className="text-white hover:text-blue-500 transition-colors">
-          <FaBell className="text-lg" />
-        </button>
+        {/* Profile */}
+        <div className="md:block hidden">
+          {status === "authenticated" || userData !== null ? (
+            <Link href="/profile">
+              {session?.user?.image ? (
+                <Image
+                  src={session.user.image.url || session.user.image}
+                  alt="User Profile"
+                  width={40}
+                  height={40}
+                  className="rounded-full object-cover cursor-pointer" />
+              ) : publicId ? (
+                <CldImage
+                  src={publicId}
+                  alt="User Profile"
+                  width={40}
+                  height={40}
+                  className="rounded-full object-cover cursor-pointer" />
+              ) : (
+                <Link href="/login">
+                  <FaRegCircleUser className="text-3xl cursor-pointer" />
+                </Link>
+              )}
+            </Link>
+          ) : (
+            <Link href="/login">
+              <FaRegCircleUser className="text-2xl text-white md:text-3xl cursor-pointer" />
+            </Link>
+          )}
+        </div>
 
         {/* User Profile */}
         {status === "authenticated" || userData ? (

@@ -1,9 +1,10 @@
 'use client';
 import React, { useRef, useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaPlus, FaHeart, FaShareAlt, FaDownload } from 'react-icons/fa';
+import { FaPlus, FaHeart, FaShareAlt, FaDownload, FaCheck } from 'react-icons/fa';
 import Image from 'next/image';
 import "./global.css";
+import Link from 'next/link';
 export default function Movie({ params }) {
   const { id } = React.use(params);
   const [movies, setMovies] = useState(null);
@@ -11,6 +12,16 @@ export default function Movie({ params }) {
   const videoRef = useRef(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [relatedMovies, setRelatedMovies] = useState([]);
+  const [liked, setLiked] = useState(false);
+  const [added, setAdded] = useState(false);
+
+  const toggleAddToList = () => {
+    setAdded(!added);
+  };
+
+  const toggleLike = () => {
+    setLiked(!liked);
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -160,12 +171,12 @@ export default function Movie({ params }) {
   return (
     <div className="flex flex-wrap">
       {/* Left Side - Sticky Content */}
-      <div className="w-full lg:w-1/2 sticky top-0 z-50 overflow-hidden">
+      <div className="w-full lg:w-1/2">
         <div className="relative flex flex-col pt-20">
           <div
             className={`relative ${isFullScreen
               ? 'w-full h-screen'
-              : 'md:w-full md:h-1/2 w-full h-[30vh]'
+              : 'md:w-full md:h-[60vh] w-full h-[30vh]'
               } transition-all duration-300`}
           >
             <video
@@ -178,30 +189,40 @@ export default function Movie({ params }) {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-center pt-6 p-2 bg-transparent space-x-10 md:w-[50vw]">
+          <div className="flex justify-center pt-6 p-3 text-center md:p-1 md:pt-4 bg-transparent space-x-10 md:w-[50vw]">
             <div className="flex flex-col items-center">
-              <button className="text-white text-3xl hover:text-green-400 transition duration-300">
-                <FaPlus />
+              <button
+                onClick={toggleAddToList}
+                className={`text-2xl md:text-3xl transition duration-300 ${added ? "text-green-500" : "text-white hover:text-green-400"
+                  }`}
+              >
+                {added ? <FaCheck /> : <FaPlus />}
               </button>
-              <h3 className="text-sm text-gray-400">Add to List</h3>
+              <h3 className="text-sm text-gray-400">
+                {added ? "Added to List" : "Add to List"}
+              </h3>
             </div>
             <div className="flex flex-col items-center">
-              <button className="text-white text-3xl hover:text-red-400 transition duration-300">
+              <button
+                onClick={toggleLike}
+                className={`text-2xl md:text-3xl transition duration-300 ${liked ? "text-red-500" : "text-white"
+                  }`}
+              >
                 <FaHeart />
               </button>
-              <h3 className="text-sm text-gray-400">Like</h3>
+              <h3 className="text-sm text-gray-400">{liked ? "Liked" : "Like"}</h3>
             </div>
             <div className="flex flex-col items-center">
               <button
                 onClick={handleShare}
-                className="text-white text-3xl hover:text-blue-400 transition duration-300"
+                className="text-white text-2xl md:text-3xl hover:text-blue-400 transition duration-300"
               >
                 <FaShareAlt />
               </button>
               <h3 className="text-sm text-gray-400">Share</h3>
             </div>
             <div className="flex flex-col items-center">
-              <button className="text-white text-3xl hover:text-yellow-400 transition duration-300">
+              <button className="text-white text-2xl md:text-3xl hover:text-yellow-400 transition duration-300">
                 <FaDownload />
               </button>
               <h3 className="text-sm text-gray-400">Download</h3>
@@ -238,36 +259,57 @@ export default function Movie({ params }) {
             <h3 className="text-xl font-semibold text-gray-700 mb-4">Related Movies</h3>
             {relatedMovies.length > 0 ? (
               relatedMovies.map((movie) => (
-                <div
-                  key={movie.trackId}
-                  className="movie-item flex items-start bg-white shadow-md rounded-md overflow-hidden mb-4"
-                >
-                  {/* Image */}
-                  <div className="w-24 h-24 flex-shrink-0 relative">
-                    <Image
-                      src={movie.artworkUrl1000 || movie.artworkUrl500}
-                      alt={movie.trackName}
-                      layout="fill"
-                      objectFit="cover"
-                      className="rounded-md"
-                    />
-                  </div>
+                <Link href={`/movies/${movie.trackId}`} key={movie.trackId}>
+                  <div
+                    className="movie-item flex items-start bg-white shadow-md rounded-md overflow-hidden mb-4 relative group"
+                  >
+                    {/* Image */}
+                    <div className="w-24 h-[104px] flex-shrink-0 relative">
+                      <Image
+                        src={movie.artworkUrl1000 || movie.artworkUrl500}
+                        alt={movie.trackName}
+                        layout="fill"
+                        objectFit="fill"
+                        className="rounded-md"
+                      />
+                    </div>
 
-                  {/* Movie Details */}
-                  <div className="p-4 flex-1 overflow-hidden">
-                    <h4 className="text-lg font-medium text-gray-800 truncate">
-                      {movie.trackName}
-                    </h4>
-                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                      {movie.shortDescription || 'No description available'}
-                    </p>
+                    {/* Movie Details */}
+                    <div className="p-4 flex-1 overflow-hidden">
+                      <h4 className="text-lg font-medium text-gray-800 truncate">
+                        {movie.trackName}
+                      </h4>
+                      <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                        {movie.shortDescription || movie.longDescription || 'No description available'}
+                      </p>
+                    </div>
+
+                    {/* Hover Preview */}
+                    {/* <div
+                      className="md:block hidden absolute top-0 right-0 z-50 h-[104px] w-[26vw] text-white text-sm rounded-md p-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                    >
+                      {movie.previewUrl ? (
+                        <span className="text-green-400">
+                          <video
+                            id="movie-video"
+                            className="w-full h-full object-fill"
+                            src={movies.previewUrl}
+                            ref={videoRef}
+                          />
+                        </span>
+                      ) : (
+                        <p>No preview available</p>
+                      )}
+                    </div> */}
                   </div>
-                </div>
+                </Link>
               ))
             ) : (
               <p className="text-gray-500">No related movies found.</p>
             )}
           </div>
+
+
         </div>
       </div>
     </div>

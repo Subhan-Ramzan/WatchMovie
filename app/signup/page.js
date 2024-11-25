@@ -126,7 +126,7 @@ const Signup = () => {
           property="og:description"
           content="Join Subhan Ramzan's community by signing up. Access exclusive features and manage your projects."
         />
-        <meta property="og:url" content="https://subhanramzan.com/signup" />
+        <meta property="og:url" content="https://watchmovie-nine.vercel.app/signup" />
         <meta property="og:type" content="website" />
       </Head>
 
@@ -161,7 +161,7 @@ const Signup = () => {
                   {({ open }) => (
                     <label
                       htmlFor="uploadImageInput"
-                      className={`cursor-pointer rounded-full relative w-40 h-40 shadow-lg hover:shadow-xl transform hover:scale-105 ${
+                      className={`cursor-pointer rounded-full relative w-40 h-40 shadow-lg hover:shadow-xl transform hover:scale-105 overflow-hidden ${
                         publicId
                           ? ""
                           : "border-2 border-dashed border-gray-300 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-blue-500 hover:via-green-500 hover:to-purple-500 transition-all duration-500 ease-in-out"
@@ -176,8 +176,8 @@ const Signup = () => {
                           src={publicId}
                           alt="Uploaded Image"
                           width={300}
-                          height={200}
-                          className="rounded-full object-cover"
+                          height={300}
+                          className="w-full h-full object-cover"
                         />
                       ) : (
                         <div className="flex flex-col items-center text-white">

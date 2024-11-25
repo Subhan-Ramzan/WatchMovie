@@ -9,7 +9,7 @@ const ProgressiveImageCard = ({ movie }) => {
     const [imageLoaded, setImageLoaded] = useState(false);
 
     return (
-        <div className="border border-gray-300 rounded-lg shadow-lg overflow-hidden bg-white transition-all hover:scale-105 hover:shadow-xl">
+        <div className="border border-gray-300 rounded-lg shadow-lg overflow-hidden transition-all hover:scale-105 hover:shadow-xl">
             <Link href={`/movies/${movie.trackId}`}>
                 <div className="relative w-full h-56 sm:h-64">
 
@@ -105,7 +105,7 @@ const MoviesPage = () => {
         return <div className="text-red-500 text-center text-xl">{error}</div>;
     }
 
-    if (!movies) {
+    if (!movies.length) {
         return (
             <div className="flex items-center justify-center h-screen">
                 <div className="flex flex-col items-center space-y-4">
