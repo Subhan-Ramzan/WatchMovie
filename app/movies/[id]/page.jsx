@@ -5,7 +5,13 @@ import { FaPlus, FaHeart, FaShareAlt, FaDownload, FaCheck } from 'react-icons/fa
 import Image from 'next/image';
 import "./global.css";
 import Link from 'next/link';
+import { useSession } from "next-auth/react";
+import { CldImage } from "next-cloudinary";
+import { FaRegCircleUser } from "react-icons/fa6";
+import { useRouter } from "next/navigation";
+
 export default function Movie({ params }) {
+
   const { id } = React.use(params);
   const [movies, setMovies] = useState(null);
   const [error, setError] = useState(null);
@@ -14,6 +20,61 @@ export default function Movie({ params }) {
   const [relatedMovies, setRelatedMovies] = useState([]);
   const [liked, setLiked] = useState(false);
   const [added, setAdded] = useState(false);
+  const { data: session, status } = useSession();
+  const [userData, setUserData] = useState(null);
+  const [publicId, setPublicId] = useState(null);
+  const router = useRouter();
+  const [favorites, setFavorites] = useState([]);
+
+  // Load favorites from localStorage initially
+  useEffect(() => {
+    const storedFavorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    setFavorites(storedFavorites);
+  }, []);
+
+  const toggleFavorite = (movie) => {
+    const isFavorite = favorites.some(fav => fav.id === movie.id);
+    let updatedFavorites;
+    if (isFavorite) {
+      updatedFavorites = favorites.filter(fav => fav.id !== movie.id);
+    } else {
+      updatedFavorites = [...favorites, movie];
+    }
+    setFavorites(updatedFavorites);
+    localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+  };
+
+
+  useEffect(() => {
+    console.log("status:", status); // Debugging line
+    console.log("userData:", userData); // Debugging line
+
+    const fetchCookieData = async () => {
+      try {
+        const response = await axios.get("/api/protected", {
+          withCredentials: true,
+        });
+        setUserData(response.data.user);
+        const user = response.data.user;
+        const id = user.id;
+
+        if (id) {
+          const imageResponse = await axios.get(`/api/profileimage/${id}`);
+          setPublicId(imageResponse.data.public_id);
+        } else {
+          console.log("No user ID found; skipping profile image fetch");
+        }
+      } catch (error) {
+        console.log("Failed to fetch protected data:", error);
+        setUserData(null);
+        console.log("User data set to null due to fetch error");
+      }
+    };
+
+    if (status === "unauthenticated" && userData === null) {
+      fetchCookieData();
+    }
+  }, [status, userData, router]);
 
   const toggleAddToList = () => {
     setAdded(!added);
@@ -190,18 +251,37 @@ export default function Movie({ params }) {
 
           {/* Action Buttons */}
           <div className="flex justify-center pt-6 p-3 text-center md:p-1 md:pt-4 bg-transparent space-x-10 md:w-[50vw]">
-            <div className="flex flex-col items-center">
-              <button
-                onClick={toggleAddToList}
-                className={`text-2xl md:text-3xl transition duration-300 ${added ? "text-green-500" : "text-white hover:text-green-400"
-                  }`}
-              >
-                {added ? <FaCheck /> : <FaPlus />}
-              </button>
-              <h3 className="text-sm text-gray-400">
-                {added ? "Added to List" : "Add to List"}
-              </h3>
+            <div className="flex justify-center text-center">
+              {status === "authenticated" || userData !== null ? (
+                <div className="flex flex-col items-center">
+                  <button
+                    onClick={() => { toggleAddToList(); toggleFavorite(movies) }}
+                    className={`text-2xl md:text-3xl transition duration-300 ${added ? "text-green-500" : "text-white hover:text-green-400"
+                      }`}
+                  >
+                    {added ? <FaCheck /> : <FaPlus />}
+                  </button>
+                  <h3 className="text-sm text-gray-400">
+                    {added ? "Added to List" : "Add to List"}
+                  </h3>
+                </div>
+              ) : (
+                <Link href="/login">
+                  <div className="flex flex-col items-center">
+                    <button
+                      className={`text-2xl md:text-3xl transition duration-300 ${added ? "text-green-500" : "text-white hover:text-green-400"
+                        }`}
+                    >
+                      <FaPlus />
+                    </button>
+                    <h3 className="text-sm text-gray-400">
+                      Add to List
+                    </h3>
+                  </div>
+                </Link>
+              )}
             </div>
+
             <div className="flex flex-col items-center">
               <button
                 onClick={toggleLike}
@@ -233,6 +313,7 @@ export default function Movie({ params }) {
 
       <div className="w-full lg:w-1/2 p-4 md:py-20 overflow-y-auto max-h-screen">
         <div className="flex flex-col items-center">
+          <h1 className='text-2xl font-bold text-gray-200 p-2 text-start'>Now</h1>
           {movies ? (
             <div className="main-movie bg-white shadow-lg rounded-md overflow-hidden w-full max-w-md">
               <div className="relative w-full h-64">
@@ -256,7 +337,7 @@ export default function Movie({ params }) {
 
           {/* Related Movies */}
           <div className="related-movies mt-8 w-full max-w-md">
-            <h3 className="text-xl font-semibold text-gray-700 mb-4">Related Movies</h3>
+            <h3 className="text-xl font-semibold text-gray-200 mb-4">Related Movies</h3>
             {relatedMovies.length > 0 ? (
               relatedMovies.map((movie) => (
                 <Link href={`/movies/${movie.trackId}`} key={movie.trackId}>

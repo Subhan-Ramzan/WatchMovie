@@ -156,9 +156,7 @@ export default function Navbar() {
                   height={40}
                   className="rounded-full object-cover cursor-pointer" />
               ) : (
-                <Link href="/login">
                   <FaRegCircleUser className="text-3xl cursor-pointer" />
-                </Link>
               )}
             </Link>
           ) : (
