@@ -170,7 +170,7 @@ export default function Navbar() {
         {status === "authenticated" || userData ? (
           <div className="flex items-center justify-center gap-2">
             <p className="text-white hidden md:block">
-              Hi, {session?.user?.name || userData.username || "User"}
+              Hi, {session?.user?.name || userData?.username || "User"}
             </p>
             <button
               onClick={async () => {

@@ -1,7 +1,7 @@
 'use client';
 import React, { useRef, useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaPlus, FaHeart, FaShareAlt, FaDownload, FaCheck } from 'react-icons/fa';
+import { FaPlus, FaHeart, FaShareAlt, FaDownload, FaCheck, FaTimes } from 'react-icons/fa';
 import Image from 'next/image';
 import "./global.css";
 import Link from 'next/link';
@@ -11,7 +11,6 @@ import { FaRegCircleUser } from "react-icons/fa6";
 import { useRouter } from "next/navigation";
 
 export default function Movie({ params }) {
-
   const { id } = React.use(params);
   const [movies, setMovies] = useState(null);
   const [error, setError] = useState(null);
@@ -26,28 +25,16 @@ export default function Movie({ params }) {
   const router = useRouter();
   const [favorites, setFavorites] = useState([]);
 
-  // Load favorites from localStorage initially
-  useEffect(() => {
-    const storedFavorites = JSON.parse(localStorage.getItem('favorites')) || [];
-    setFavorites(storedFavorites);
-  }, []);
+  const [Isemail, setIsEmail] = useState('');
+  const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
 
-  const toggleFavorite = (movie) => {
-    const isFavorite = favorites.some(fav => fav.id === movie.id);
-    let updatedFavorites;
-    if (isFavorite) {
-      updatedFavorites = favorites.filter(fav => fav.id !== movie.id);
-    } else {
-      updatedFavorites = [...favorites, movie];
-    }
-    setFavorites(updatedFavorites);
-    localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
-  };
-
+  console.log(`Id is ${id}`);
 
   useEffect(() => {
-    console.log("status:", status); // Debugging line
-    console.log("userData:", userData); // Debugging line
+    console.log("status:", status);
+    console.log("userData:", userData); 
+    console.log("Data:", session?.user?.email); 
 
     const fetchCookieData = async () => {
       try {
@@ -55,6 +42,8 @@ export default function Movie({ params }) {
           withCredentials: true,
         });
         setUserData(response.data.user);
+        console.log(`response is ${response?.data?.user?.email}`);
+        setIsEmail(response?.data?.user?.email)
         const user = response.data.user;
         const id = user.id;
 
@@ -74,7 +63,50 @@ export default function Movie({ params }) {
     if (status === "unauthenticated" && userData === null) {
       fetchCookieData();
     }
+    if (status === "authenticated") {
+      setIsEmail(session?.user?.email)
+    }
   }, [status, userData, router]);
+
+  const trackname = movies?.trackName
+  const artworkUrl = movies?.artworkUrl1000
+
+  const [formData, setFormData] = useState({
+    email: Isemail,
+    movieId: id,
+    movieName: trackname,
+    thumbnail: artworkUrl,
+  });
+
+  useEffect(() => {
+    setFormData({
+      email: Isemail,
+      movieId: id,
+      movieName: movies?.trackName,
+      thumbnail: movies?.artworkUrl1000,
+    });
+  }, [Isemail, id, movies]);
+
+
+  const handleFavorite = async () => {
+    setMessage("");
+    setIsError(false);
+
+    const dataToSend = {
+      email: session?.user?.email || Isemail,
+      movieId: id,
+      movieName: movies?.trackName,
+      thumbnail: movies?.artworkUrl1000,
+    };
+
+    try {
+      const response = await axios.post("/api/favorite", dataToSend);
+      setMessage(response.data.message);
+    } catch (error) {
+      setIsError(true);
+      setMessage(error.response?.data?.error || "Something went wrong!");
+    }
+  };
 
   const toggleAddToList = () => {
     setAdded(!added);
@@ -255,28 +287,38 @@ export default function Movie({ params }) {
               {status === "authenticated" || userData !== null ? (
                 <div className="flex flex-col items-center">
                   <button
-                    onClick={() => { toggleAddToList(); toggleFavorite(movies) }}
-                    className={`text-2xl md:text-3xl transition duration-300 ${added ? "text-green-500" : "text-white hover:text-green-400"
-                      }`}
+                    onClick={() => { toggleAddToList(); handleFavorite(); }}
+                    className={`text-2xl md:text-3xl transition duration-300 ${added ? (isError ? "text-red-500" : "text-green-500") : "text-white hover:text-green-400"}`}
                   >
-                    {added ? <FaCheck /> : <FaPlus />}
+                    {added ? (isError ? <FaTimes className="text-red-500" /> : <FaCheck className="text-green-500" />) : <FaPlus />}
                   </button>
+
+                  {message && (
+                    <p
+                      className={`mt-4 text-center font-medium ${isError ? "text-red-500" : "text-green-500"}`}
+                      style={{
+                        wordWrap: 'break-word',
+                        maxWidth: '200px',
+                      }}
+                    >
+                      {message}
+                    </p>
+                  )}
+
                   <h3 className="text-sm text-gray-400">
-                    {added ? "Added to List" : "Add to List"}
+                    {added ? "" : "Add to List"}
                   </h3>
                 </div>
+
               ) : (
                 <Link href="/login">
                   <div className="flex flex-col items-center">
                     <button
-                      className={`text-2xl md:text-3xl transition duration-300 ${added ? "text-green-500" : "text-white hover:text-green-400"
-                        }`}
+                      className={`text-2xl md:text-3xl transition duration-300 ${added ? "text-green-500" : "text-white hover:text-green-400"}`}
                     >
                       <FaPlus />
                     </button>
-                    <h3 className="text-sm text-gray-400">
-                      Add to List
-                    </h3>
+                    <h3 className="text-sm text-gray-400">Add to List</h3>
                   </div>
                 </Link>
               )}
@@ -285,13 +327,13 @@ export default function Movie({ params }) {
             <div className="flex flex-col items-center">
               <button
                 onClick={toggleLike}
-                className={`text-2xl md:text-3xl transition duration-300 ${liked ? "text-red-500" : "text-white"
-                  }`}
+                className={`text-2xl md:text-3xl transition duration-300 ${liked ? "text-red-500" : "text-white"}`}
               >
                 <FaHeart />
               </button>
               <h3 className="text-sm text-gray-400">{liked ? "Liked" : "Like"}</h3>
             </div>
+
             <div className="flex flex-col items-center">
               <button
                 onClick={handleShare}
@@ -301,6 +343,7 @@ export default function Movie({ params }) {
               </button>
               <h3 className="text-sm text-gray-400">Share</h3>
             </div>
+
             <div className="flex flex-col items-center">
               <button className="text-white text-2xl md:text-3xl hover:text-yellow-400 transition duration-300">
                 <FaDownload />
@@ -308,6 +351,7 @@ export default function Movie({ params }) {
               <h3 className="text-sm text-gray-400">Download</h3>
             </div>
           </div>
+
         </div>
       </div>
 
@@ -321,7 +365,9 @@ export default function Movie({ params }) {
                   src={movies.artworkUrl1000}
                   alt={movies.trackName}
                   fill
-                  className="object-cover rounded-t-md"
+                  className="object-fill rounded-t-md"
+                  sizes="(max-width: 640px) 100vw, 50vw" 
+                  priority 
                 />
               </div>
               <div className="p-4">
@@ -349,9 +395,9 @@ export default function Movie({ params }) {
                       <Image
                         src={movie.artworkUrl1000 || movie.artworkUrl500}
                         alt={movie.trackName}
-                        layout="fill"
-                        objectFit="fill"
-                        className="rounded-md"
+                        fill
+                        className="rounded-md object-fill"
+                        sizes="(max-width: 640px) 100vw, 50vw" // Example sizes
                       />
                     </div>
 
