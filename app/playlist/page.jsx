@@ -15,11 +15,11 @@ export default function Page({ params }) {
   const { data: session, status } = useSession();
   const [userData, setUserData] = useState(null);
   const router = useRouter();
-
+  const [Isloading, setIsLoading] = useState(true);
   const [Isemail, setIsEmail] = useState('');
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
-
+  Isloading
   console.log(`Id is ${id}`);
 
 
@@ -110,6 +110,45 @@ export default function Page({ params }) {
       setError("Error removing movie. Please try again later.");
     }
   };
+  useEffect(() => {
+    if (movies.length === 0) {
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
+    } else {
+      setIsLoading(false);
+    }
+  }, [movies]);
+
+  if (Isloading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="flex flex-col items-center space-y-4">
+          <svg
+            className="animate-spin h-12 w-12 text-blue-500"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C6.477 0 0 6.477 0 14h4zm2 5.291V20a10.015 10.015 0 0114-5.709l-1.5-1.5A8.015 8.015 0 006 17.291z"
+            ></path>
+          </svg>
+          <p className="text-lg font-medium text-gray-700">Movies...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">

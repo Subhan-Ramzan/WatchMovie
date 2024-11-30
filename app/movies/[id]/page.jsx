@@ -33,8 +33,8 @@ export default function Movie({ params }) {
 
   useEffect(() => {
     console.log("status:", status);
-    console.log("userData:", userData); 
-    console.log("Data:", session?.user?.email); 
+    console.log("userData:", userData);
+    console.log("Data:", session?.user?.email);
 
     const fetchCookieData = async () => {
       try {
@@ -63,10 +63,8 @@ export default function Movie({ params }) {
     if (status === "unauthenticated" && userData === null) {
       fetchCookieData();
     }
-    // if (status === "authenticated") {
-    //   setIsEmail(session?.user?.email)
-    // }
-  }, [status, userData, router]);
+
+  }, [status, session, userData, router]);
 
   const trackname = movies?.trackName
   const artworkUrl = movies?.artworkUrl1000
@@ -366,8 +364,8 @@ export default function Movie({ params }) {
                   alt={movies.trackName}
                   fill
                   className="object-fill rounded-t-md"
-                  sizes="(max-width: 640px) 100vw, 50vw" 
-                  priority 
+                  sizes="(max-width: 640px) 100vw, 50vw"
+                  priority
                 />
               </div>
               <div className="p-4">
@@ -391,7 +389,7 @@ export default function Movie({ params }) {
                     className="movie-item flex items-start bg-white shadow-md rounded-md overflow-hidden mb-4 relative group"
                   >
                     {/* Image */}
-                    <div className="w-24 h-[104px] flex-shrink-0 relative">
+                    <div className="w-24 h-[105px] flex-shrink-0 relative">
                       <Image
                         src={movie.artworkUrl1000 || movie.artworkUrl500}
                         alt={movie.trackName}
