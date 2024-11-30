@@ -63,9 +63,9 @@ export default function Movie({ params }) {
     if (status === "unauthenticated" && userData === null) {
       fetchCookieData();
     }
-    if (status === "authenticated") {
-      setIsEmail(session?.user?.email)
-    }
+    // if (status === "authenticated") {
+    //   setIsEmail(session?.user?.email)
+    // }
   }, [status, userData, router]);
 
   const trackname = movies?.trackName
